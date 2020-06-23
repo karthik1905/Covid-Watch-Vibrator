@@ -121,9 +121,8 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
           if(obj[i].deviceName.equals(defaultName)) 
             indexNull = i;
         }
-
         if(!flag){
-          if(rs >= -60){
+          if(rs >= -80){
             obj[indexNull].deviceName = namevalue;
             String payload ="{";
             payload +="\"SENDER ID \":"; payload +="\"NTCPW001\""; payload +=",";
@@ -131,11 +130,16 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
             payload +="}";
             Serial.println(payload);
             Serial.print(namevalue);
-            Serial.println("entered the radius");            
+            Serial.println("entered the radius");     
+            digitalWrite(13,HIGH);
+            digitalWrite(12,HIGH);   
+            delay(250); 
+            digitalWrite(13,LOW);
+            digitalWrite(12,LOW);     
           }
         }
         else if(flag){
-          if(rs <= -60){
+          if(rs <= -80){
             String payload ="{";
             payload +="\"SENDER ID \":"; payload +="\"NTCPW001\""; payload +=",";
             payload +="\"DEVICE EXITED\":"; payload += namevalue;
@@ -145,6 +149,13 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
             Serial.println("exited the radius"); 
             obj[index].deviceName = defaultName;           
           }
+          else{
+            digitalWrite(13,HIGH);
+            digitalWrite(12,HIGH);   
+            delay(250); 
+            digitalWrite(13,LOW);
+            digitalWrite(12,LOW);
+          }
         }
       }
     }
@@ -153,6 +164,9 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 void setup() {
   Serial.begin(115200);
   gettimeofday(&now, NULL);
+
+  pinMode(12,OUTPUT);
+  pinMode(13,OUTPUT);
  Serial.printf("start ESP32 %d\n",bootcount++);
  Serial.printf("deep sleep (%lds since last reset, %lds since last boot)\n",now.tv_sec,now.tv_sec-last);
   last = now.tv_sec;
@@ -192,7 +206,7 @@ void setup() {
 }
 
 void loop() {
-                               
+ 
   pBLEScan = BLEDevice::getScan(); //create new scan
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
@@ -203,5 +217,7 @@ void loop() {
   Serial.println(foundDevices.getCount());
   Serial.println("Scan done!");
   pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
-   
+
+
+
 }
